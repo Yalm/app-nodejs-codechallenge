@@ -8,8 +8,26 @@ describe('UpdateStatusExternalTransactionsUseCaseImpl', () => {
     findById: jest.fn(),
     updateStatusById: jest.fn(),
   };
+  const cacheManager = {
+    del: jest.fn(),
+    get: jest.fn(),
+    set: jest.fn(),
+    mget: jest.fn(),
+    mset: jest.fn(),
+    clear: jest.fn(),
+    refresh: jest.fn(),
+    ttl: jest.fn(),
+    mdel: jest.fn(),
+    on: jest.fn(),
+    off: jest.fn(),
+    disconnect: jest.fn(),
+    cacheId: jest.fn(),
+    wrap: jest.fn(),
+    stores: [],
+  };
 
   const useCase = new UpdateStatusExternalTransactionsUseCaseImpl(
+    cacheManager,
     externalTransactionRepository,
   );
 

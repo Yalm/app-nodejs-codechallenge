@@ -6,6 +6,7 @@ import {
 import { ExternalTransactionStatus } from '../../domain/external-transaction.entity';
 import { ExternalTransactionNotFoundException } from '../../domain/exceptions/external-transaction-not-found.exception';
 import { UpdateStatusExternalTransactionsUseCase } from './update-status-external-transaction.use-case';
+import { CACHE_MANAGER, type Cache } from '@nestjs/cache-manager';
 
 @Injectable()
 export class UpdateStatusExternalTransactionsUseCaseImpl
@@ -16,6 +17,7 @@ export class UpdateStatusExternalTransactionsUseCaseImpl
   );
 
   constructor(
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     @Inject(EXTERNAL_TRANSACTION_REPOSITORY)
     private readonly externalTransactionRepository: ExternalTransactionRepository,
   ) {}
@@ -31,5 +33,9 @@ export class UpdateStatusExternalTransactionsUseCaseImpl
     }
 
     await this.externalTransactionRepository.updateStatusById(id, { status });
+    this.logger.debug(`Status updated for external transaction ${id}`);
+
+    await this.cacheManager.del(`/external-transactions/${id}`);
+    this.logger.debug(`Cache cleared for external transaction ${id}`);
   }
 }

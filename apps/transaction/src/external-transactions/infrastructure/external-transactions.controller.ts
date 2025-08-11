@@ -7,6 +7,7 @@ import {
   Logger,
   NotFoundException,
   Param,
+  ParseUUIDPipe,
   Post,
   UseInterceptors,
 } from '@nestjs/common';
@@ -56,7 +57,7 @@ export class ExternalTransactionsController {
   @Get(':id')
   @UseInterceptors(CacheInterceptor)
   @CacheTTL(5000)
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     this.logger.debug(`Finding external transaction with id ${id}`);
     try {
       const externalTransaction =
