@@ -1,82 +1,84 @@
-# Yape Code Challenge :rocket:
+# Installation
 
-Our code challenge will let you marvel us with your Jedi coding skills :smile:. 
+1. Install dependencies:
+    ```sh
+    npm install
+    ```
 
-Don't forget that the proper way to submit your work is to fork the repo and create a PR :wink: ... have fun !!
+2. Configure environment variables:
+    - Create a `.env` file in the microservice folder (`apps/antifraud` or `apps/transaction`). Use `.env.dev` as reference.
 
-- [Problem](#problem)
-- [Tech Stack](#tech_stack)
-- [Send us your challenge](#send_us_your_challenge)
+# Execution
 
-# Problem
-
-Every time a financial transaction is created it must be validated by our anti-fraud microservice and then the same service sends a message back to update the transaction status.
-For now, we have only three transaction statuses:
-
-<ol>
-  <li>pending</li>
-  <li>approved</li>
-  <li>rejected</li>  
-</ol>
-
-Every transaction with a value greater than 1000 should be rejected.
-
-```mermaid
-  flowchart LR
-    Transaction -- Save Transaction with pending Status --> transactionDatabase[(Database)]
-    Transaction --Send transaction Created event--> Anti-Fraud
-    Anti-Fraud -- Send transaction Status Approved event--> Transaction
-    Anti-Fraud -- Send transaction Status Rejected event--> Transaction
-    Transaction -- Update transaction Status event--> transactionDatabase[(Database)]
+## Local
+To start a microservice in development mode:
+```sh
+npm run start:antifraud:dev   # Antifraud
+npm run start:transaction:dev # Transaction
 ```
 
-# Tech Stack
-
-<ol>
-  <li>Node. You can use any framework you want (i.e. Nestjs with an ORM like TypeOrm or Prisma) </li>
-  <li>Any database</li>
-  <li>Kafka</li>    
-</ol>
-
-We do provide a `Dockerfile` to help you get started with a dev environment.
-
-You must have two resources:
-
-1. Resource to create a transaction that must containt:
-
-```json
-{
-  "accountExternalIdDebit": "Guid",
-  "accountExternalIdCredit": "Guid",
-  "tranferTypeId": 1,
-  "value": 120
-}
+## Docker
+Start all services (MongoDB, Kafka, Zookeeper, and microservices):
+```sh
+docker-compose up --build
+```
+To stop:
+```sh
+docker-compose down
 ```
 
-2. Resource to retrieve a transaction
+# Access
 
-```json
-{
-  "transactionExternalId": "Guid",
-  "transactionType": {
-    "name": ""
-  },
-  "transactionStatus": {
-    "name": ""
-  },
-  "value": 120,
-  "createdAt": "Date"
-}
+Open your browser at:
+```
+http://localhost:3000
 ```
 
-## Optional
+# Exposed Endpoints
 
-You can use any approach to store transaction data but you should consider that we may deal with high volume scenarios where we have a huge amount of writes and reads for the same data at the same time. How would you tackle this requirement?
+Microservice `external-transactions`:
 
-You can use Graphql;
+### POST /external-transactions
+Creates a new external transaction.
+- **Body:** `CreateExternalTransactionDto`
+- **Response:** `ExternalTransactionResponseDto`
+- **Errors:**
+   - `400 Bad Request` if the transaction type does not exist
 
-# Send us your challenge
+### GET /external-transactions/:id
+Gets an external transaction by its ID.
+- **Parameter:** `id` (string)
+- **Response:** `ExternalTransactionResponseDto`
+- **Errors:**
+   - `404 Not Found` if the transaction does not exist
 
-When you finish your challenge, after forking a repository, you **must** open a pull request to our repository. There are no limitations to the implementation, you can follow the programming paradigm, modularization, and style that you feel is the most appropriate solution.
+# Supported Transaction Types
 
-If you have any questions, please let us know.
+Only the following values are accepted in the `tranferTypeId` field:
+
+| ID | Type        |
+|----|-------------|
+| 1  | Transfer    |
+| 2  | Withdrawal  |
+| 3  | Deposit     |
+
+Other values will generate a `400 Bad Request` error.
+
+# Useful Commands
+
+- **Debug mode:**
+   ```sh
+   npm run start:debug
+   ```
+- **Lint:**
+   ```sh
+   npm run lint
+   ```
+- **Build:**
+   ```sh
+   npm run build
+   ```
+- **Tests:**
+   ```sh
+   npm run test
+   ```
